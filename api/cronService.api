@@ -1,0 +1,82 @@
+syntax = "v1"
+
+info(
+	title: "cron-service"
+	desc: "cron service restful api"
+	author: "994685563@qq.com"
+	email: "994685563@qq.com"
+	version: "v1.0.0"
+)
+
+// 查询任务
+type QueryJobsRequest {
+	Query string `query:"query,optional=1"`
+	Page  int    `query:"page,optional=1,default=1"`
+	Count int    `query:"count,optional=1,default=10"`
+}
+
+// 添加任务
+type AddJobRequest {
+	Name    string            `form:"name,optional=1" desc:"任务名,可选" json:"name"`
+	Express string            `form:"express" desc:"定时表达式" json:"express"`
+	Handler string            `form:"handler" desc:"任务处理器" json:"handler"`
+	Params  map[string]string `form:"params,optional=1" desc:"任务参数" json:"params"`
+}
+
+// 任务信息记录对象
+type JobEntry {
+	Id           int64             `json:"id"`
+	Name         string            `json:"name"`
+	Count        int64             `json:"count"`
+	Status       int               `json:"status"`
+	Express      string            `json:"express"`
+	Handler      string            `json:"handler"`
+	NextExecTime int64             `json:"nextExecTime"`
+	Params       map[string]string `json:"params"`
+}
+
+// 分页聚合参数
+type Aggregation {
+	Total int `json:"total"`
+	More  int `json:"more"`
+	Page  int `json:"page"`
+	Size  int `json:"size"`
+	Count int `json:"count"`
+}
+
+// 数据体
+type QueryResponseData {
+	Items []*JobEntry  `json:"items"`
+	Agg   *Aggregation `json:"agg"`
+}
+
+// 任务列表结果
+type QueryJobsResponse {
+	Code int                `json:"code"`
+	Msg  string             `json:"msg"`
+	Data *QueryResponseData `json:"data"`
+}
+
+// 数据
+type AddJobResponseData {
+	Id int64 `json:"id"`
+}
+
+// 添加任务请求
+type AddJobResponse {
+	Code int                 `json:"code"`
+	Msg  string              `json:"msg"`
+	Data *AddJobResponseData `json:"data"`
+}
+
+service cronService {
+	
+	@doc (
+		summary : "获取任务列表"
+	)
+	@handler GetJobs
+	get /service/cron/lists(QueryJobsRequest) returns(QueryJobsResponse)
+	
+	@handler AddJob
+	post /service/cron/add(AddJobRequest) returns(AddJobResponse)
+}
